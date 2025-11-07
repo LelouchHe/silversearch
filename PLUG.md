@@ -3,5 +3,5 @@ tags: meta/library
 files:
 - silversearch.plug.js
 ---
-changequote({{,}})
+changequote({{,}})dnl
 include({{README.md}})
