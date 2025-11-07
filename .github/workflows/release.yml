@@ -46,3 +46,4 @@ jobs:
           draft: false
           files: |
             silversearch.plug.js
+            PLUG.md
