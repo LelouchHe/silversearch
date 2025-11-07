@@ -1,15 +1,12 @@
 # Silversearch
-
 Silversearch is a plug for [Silverbullet](https://silverbullet.md/) implementing full-text search across your space, with the goal of maximum usability out of the box. It's *heavily* based on code from [Omnisearch](https://github.com/scambier/obsidian-omnisearch) (so give this guy a star not me) and as a consequence also uses [Minisearch](https://github.com/lucaong/minisearch) under the hood. When combined with other plugs it can not only search through your markdown files, but also search inside any document, like pdfs or images.
 
 ![](https://raw.githubusercontent.com/mrmugame/silversearch/main/docs/demo.webp)
 
 ## Installation
-
 Silversearch is part of the [`Std`](https://silverbullet.md/Repositories/Std) repostitory and can by installed using the [Library Manager](https://silverbullet.md/Library%20Manager). You will have to navigate to `Library/Std/Pages/Library Manager` in *your* space and look for Silversearch under the available libraries and press `Install`.
 
 ## Usage
-
 You can open the search dialog using the `Silversearch: Search` command (`Ctrl-s`/`Cmd-s`). Simply start typing to begin your search, helpful tips for refining your searches will appear at the start. If Silversearch is missing the most up-to-date content, you can rebuild the search database using the `Silversearch: Reindex` command. If you rebuild Silverbullets index, Silversearch will also rebuild, so there is no need to run both commands.
 
 Indexing for documents isn't handled by Silversearch, but by other plugs or Space Lua. You can install the following plugs to index specific documents.
@@ -19,8 +16,8 @@ Indexing for documents isn't handled by Silversearch, but by other plugs or Spac
 If you are missing something and want to write your own indexer, you can look into the [API](#API) section.
 
 ## Settings
-
 Silversearch can be configured using SpaceLua
+
 ```lua
 config.set {
   silversearch = {
@@ -54,7 +51,6 @@ config.set {
 ```
 
 ## API
-
 To integrate Silversearch with SpaceLua, use the following syscalls:
 
 - `silversearch.search(searchTerm: string, singleFilePath?: string): Promise<ResultPage[]>`: Searches the database using the `searchTerm`, which supports all functions the normal search also supports (e.g. `ext`, etc.). If `singleFilePath` is provided it will only search the provided file. The function will return an array of [`ResultPage`](https://github.com/MrMugame/silversearch/blob/5c4a3b57a8f92336c5e2b1ae29ff9d4b668cd470/shared/global.ts#L6)
@@ -79,5 +75,4 @@ type ExtractionResult = {
 ```
 
 ## LICENSE
-
 Silversearch is licensed under [GPL-3](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)).
