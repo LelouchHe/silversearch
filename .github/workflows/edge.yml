@@ -32,6 +32,10 @@ jobs:
         run: |
           deno task build
 
+      - name: Build PLUG.md
+        run: |
+          m4 PLUG.md > PLUG.md
+
       - name: Update release tag
         uses: rickstaa/action-create-tag@v1
         with:
@@ -49,3 +53,4 @@ jobs:
           body: Automated build from commit ${{ github.sha }}
           files: |
             silversearch.plug.js
+            PLUG.md

@@ -6,15 +6,7 @@ Silversearch is a plug for [Silverbullet](https://silverbullet.md/) implementing
 
 ## Installation
 
-The plug is installed like any other plug using SpaceLua. Just add `"ghr:MrMugame/silversearch"` to the `plugs` array on your `CONFIG` page.
-```lua
-config.set {
-  plugs = {
-    "ghr:MrMugame/silversearch"
-  }
-}
-```
-Then, run the `Plugs: Update` update command to download and install the plug.
+Silversearch is part of the [`Std`](https://silverbullet.md/Repositories/Std) repostitory and can by installed using the [Library Manager](https://silverbullet.md/Library%20Manager). You will have to navigate to `Library/Std/Pages/Library Manager` in *your* space and look for Silversearch under the available libraries and press `Install`.
 
 ## Usage
 
