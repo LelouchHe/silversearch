@@ -1,5 +1,5 @@
 ---
-name: Library/mrmugame/Silverbullet
+name: Library/mrmugame/Silversearch
 tags: meta/library
 files:
 - silversearch.plug.js
