@@ -55,7 +55,3 @@ export async function getPlugConfig(): Promise<SilversearchSettings> {
 
     return settings;
 }
-
-export async function getCustomStyles(): Promise<string | undefined> {
-    return await editor.getUiOption("customStyles");
-}

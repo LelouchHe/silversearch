@@ -5,6 +5,7 @@ import Modal from "./components/Modal.svelte"
 async function mountModal() {
     const path: Promise<string> = syscall("editor.getCurrentPath");
     const isDocumentEditor: Promise<string> = syscall("editor.getCurrentEditor");
+    const customStyles = syscall("editor.getUiOption", "customStyles");
 
     await Promise.race([
         new Promise((resolve) => setTimeout(resolve, 75)),
@@ -23,6 +24,7 @@ async function mountModal() {
             defaultQuery: globalThis.DEFAULT_QUERY ?? "",
             currentPath: await path,
             isDocumentEditor: (await isDocumentEditor) !== "page",
+            customStyles: await customStyles,
         }
     });
 }

@@ -6,10 +6,12 @@
         defaultQuery,
         currentPath,
         isDocumentEditor,
+        customStyles
     }: {
         defaultQuery: string;
         currentPath: string;
         isDocumentEditor: boolean;
+        customStyles: string;
     } = $props();
 
     let query = $state(defaultQuery);
@@ -28,6 +30,7 @@
     }
 </script>
 
+{@html customStyles}
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div onkeydown={onKeyDown}>
     {#if spaceModal}
