@@ -2,6 +2,7 @@ import { splitCamelCase, splitHyphens } from "./utils.ts";
 import { QueryCombination } from "minisearch";
 import { extractMdLinks } from "md-link-extractor";
 import { BRACKETS_AND_SPACE, SPACE_OR_PUNCTUATION } from "./global.ts";
+import { cut_for_search } from "jieba-wasm";
 
 export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boolean }): string[] {
     try {
@@ -74,6 +75,14 @@ function tokenizeTokens(text: string, { skipChs = false } = {}): string[] {
 }
 
 function tokenizeChsWord(tokens: string[]): string[] {
-    // TODO: Tokenize Chineese
-    return tokens;
+    const result: string[] = [];
+    for (const token of tokens) {
+        if (/[\u4e00-\u9fa5]/.test(token)) {
+            const chineseTokens = cut_for_search(token, true);
+            result.push(...chineseTokens);
+        } else {
+            result.push(token);
+        }
+    }
+    return result;
 }
