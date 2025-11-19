@@ -83,6 +83,7 @@ function tokenizeChsWord(tokens: string[]): string[] {
         if (/[\u4e00-\u9fff]/u.test(token)) {
             const segments = segmentit.doSegment(token, { simple: true, stripPunctuation : true });
             result.push(...segments);
+            console.log("SEGMENTS: ", segments);
         } else {
             result.push(token);
         }
