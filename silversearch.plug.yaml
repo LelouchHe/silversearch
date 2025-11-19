@@ -1,4 +1,4 @@
-name: silversearch
+name: silversearch-chinese
 functions:
   startSearch:
     path: "./worker/silversearch.ts:startSearch"

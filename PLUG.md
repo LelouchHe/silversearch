@@ -1,5 +1,5 @@
 ---
-name: Library/mrmugame/Silversearch
+name: Library/LelouchHe/Silversearch-Chinese
 tags: meta/library
 files:
 - silversearch.plug.js
