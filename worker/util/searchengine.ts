@@ -137,7 +137,7 @@ export class SearchEngine {
             "2": 0.2
         }[settings.fuzziness];
 
-        const searchTokens = tokenizeForSearch(query.segmentsToStr())
+        const searchTokens = tokenizeForSearch(query.segmentsToStr(), { enableChineseTokenization: settings.enableChineseTokenization });
 
         let results = this.minisearch.search(searchTokens, {
             prefix: term => term.length >= options.prefixLength,
@@ -482,7 +482,7 @@ export class SearchEngine {
 
     private static getOptions(settings: SilversearchSettings): Options<IndexableEntry> {
         return {
-            tokenize: (text: string) => tokenizeForIndexing(text, { tokenizeUrls: settings.tokenizeUrls }),
+            tokenize: (text: string) => tokenizeForIndexing(text, { tokenizeUrls: settings.tokenizeUrls, enableChineseTokenization: settings.enableChineseTokenization }),
             processTerm: (term: string) => (settings.ignoreDiacritics
                 ? removeDiacritics(term, settings.ignoreArabicDiacritics)
                 : term
