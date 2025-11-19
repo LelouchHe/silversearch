@@ -45,5 +45,5 @@ jobs:
         with:
           draft: false
           files: |
-            silversearch.plug.js
+            silversearch-chinese.plug.js
             PLUG.md
