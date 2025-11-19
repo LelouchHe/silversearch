@@ -22,6 +22,33 @@ export function stringsToRegex(strings: string[]): RegExp {
     return new RegExp(`${joined}`, 'gui');
 }
 
+async function processTextForDisplay(text: string): Promise<string> {
+    const settings = await getPlugConfig();
+    
+    text = escapeHTML(text);
+    
+    if (settings.renderLineReturnInExcerpts) {
+        text = text.replaceAll('\n', '<br>');
+    }
+    
+    return text;
+}
+
+async function normalizeLineBreaks(text: string): Promise<string> {
+    const settings = await getPlugConfig();
+    
+    if (settings.renderLineReturnInExcerpts) {
+        const lineReturn = new RegExp(/(?:\r\n|\r|\n)/g);
+        // Remove multiple line returns
+        text = text
+            .split(lineReturn)
+            .filter(l => l)
+            .join('\n');
+    }
+    
+    return text;
+}
+
 export async function getMatches(
     text: string,
     words: string[],
@@ -47,11 +74,15 @@ export async function getMatches(
 
         const matchStartIndex = match.index;
         const matchEndIndex = matchStartIndex + match[0].length;
-        const originalMatch = originalText
+        let originalMatch = originalText
             .substring(matchStartIndex, matchEndIndex)
             .trim();
 
         if (originalMatch && match.index >= 0) {
+            // Process match the same way as excerpt content for consistent highlighting
+            originalMatch = await normalizeLineBreaks(originalMatch);
+            originalMatch = originalMatch.trim();
+            originalMatch = await processTextForDisplay(originalMatch);
             matches.push({ match: originalMatch, offset: match.index });
         }
     }
@@ -60,9 +91,13 @@ export async function getMatches(
     if (query && (query.query.text.length > 1 || query.getExactTerms().length > 0)) {
         const best = text.indexOf(query.getBestStringForExcerpt());
         if (best > -1 && matches.find(m => m.offset === best)) {
+            let bestMatch = query.getBestStringForExcerpt();
+            bestMatch = await normalizeLineBreaks(bestMatch);
+            bestMatch = bestMatch.trim();
+            bestMatch = await processTextForDisplay(bestMatch);
             matches.unshift({
                 offset: best,
-                match: query.getBestStringForExcerpt(),
+                match: bestMatch,
             });
         }
     }
@@ -77,34 +112,35 @@ export async function makeExcerpt(content: string, offset: number): Promise<Resu
         const pos = offset ?? -1;
         const from = Math.max(0, pos - excerptBefore);
         const to = Math.min(content.length, pos + excerptAfter);
+        
         if (pos > -1) {
-            content =
-                (from > 0 ? '…' : '') +
-                content.slice(from, to).trim() +
-                (to < content.length - 1 ? '…' : '');
+            content = content.slice(from, to);
         } else {
             content = content.slice(0, excerptAfter);
         }
+        
+        // Calculate relative position BEFORE any transformations
+        const relativePos = pos - from;
+        
         if (settings.renderLineReturnInExcerpts) {
-            const lineReturn = new RegExp(/(?:\r\n|\r|\n)/g);
-            // Remove multiple line returns
-            content = content
-                .split(lineReturn)
-                .filter(l => l)
-                .join('\n');
-
-            const last = content.lastIndexOf('\n', pos - from);
+            // Slice at line breaks BEFORE normalizing them
+            // This uses the original line break positions
+            const last = content.slice(0, relativePos).lastIndexOf('\n');
 
             if (last > 0) {
-                content = content.slice(last);
+                content = content.slice(last + 1); // Skip the newline itself
             }
         }
+        
+        // Trim after slicing
+        content = content.trim();
+        content = (from > 0 ? '…' : '') + content + (to < content.length - 1 ? '…' : '');
+        
+        // Now normalize line breaks (collapse multiple to single)
+        content = await normalizeLineBreaks(content);
 
-        content = escapeHTML(content);
-
-        if (settings.renderLineReturnInExcerpts) {
-            content = content.trim().replaceAll('\n', '<br>');
-        }
+        // Final processing for display
+        content = await processTextForDisplay(content);
 
         return { excerpt: content, offset: offset };
     } catch (e) {
