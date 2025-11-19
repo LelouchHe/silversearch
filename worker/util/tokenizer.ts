@@ -79,10 +79,10 @@ function tokenizeTokens(text: string, { skipChs = false } = {}): string[] {
 function tokenizeChsWord(tokens: string[]): string[] {
     const result: string[] = [];
     for (const token of tokens) {
-        if (/[\u4e00-\u9fa5]/.test(token)) {
+        // `/\p{Script=Han}/u` includes Japanese/Korean as well
+        if (/[\u4e00-\u9fff]/u.test(token)) {
             const segments = segmentit.doSegment(token, { simple: true, stripPunctuation : true });
             result.push(...segments);
-            console.log("SEGMENTS: ", segments);
         } else {
             result.push(token);
         }
