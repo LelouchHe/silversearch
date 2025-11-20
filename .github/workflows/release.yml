@@ -38,6 +38,12 @@ jobs:
           mv PLUG.md PLUG_SRC.md
           m4 PLUG_SRC.md > PLUG.md
 
+      - name: Prepare release files
+        run: |
+          mkdir -p silversearch
+          mv silversearch.plug.js silversearch/
+          mv jieba_rs_wasm_bg.wasm silversearch/
+
       - name: Release
         uses: softprops/action-gh-release@v2
         env:
@@ -45,7 +51,6 @@ jobs:
         with:
           draft: false
           files: |
-            silversearch.plug.js
             PLUG.md
-            jieba_rs_wasm_bg.wasm
+            silversearch/*
             
