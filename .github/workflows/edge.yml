@@ -37,12 +37,6 @@ jobs:
           mv PLUG.md PLUG_SRC.md
           m4 PLUG_SRC.md > PLUG.md
 
-      - name: Prepare release files
-        run: |
-          mkdir -p silversearch
-          mv silversearch.plug.js silversearch/
-          mv jieba_rs_wasm_bg.wasm silversearch/
-
       - name: Update release tag
         uses: rickstaa/action-create-tag@v1
         with:
@@ -60,4 +54,5 @@ jobs:
           body: Automated build from commit ${{ github.sha }}
           files: |
             PLUG.md
-            silversearch/*
+            silversearch.plug.js
+            jieba_rs_wasm_bg.wasm
