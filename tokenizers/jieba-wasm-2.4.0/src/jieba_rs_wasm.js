@@ -309,7 +309,7 @@ async function __wbg_load(module, imports) {
 
     } else if (module instanceof Uint8Array) {
         // Silversearch CHANGE: load wasm from data directly
-        console.log(`[Silversearch] Instantiate wasm. size: ${module.length}`);
+        console.log(`Instantiate wasm. size: ${module.length}`);
         return await WebAssembly.instantiate(module, imports);
     } else {
         const instance = await WebAssembly.instantiate(module, imports);
@@ -428,7 +428,7 @@ async function __wbg_init(module_or_path) {
     if (typeof module_or_path === 'undefined') {
         // Silversearch CHANGE: use library path for wasm file
         module_or_path = `${LIBRARY_PATH}/jieba_rs_wasm_bg.wasm`;
-        console.log(`[Silversearch]Loading wasm from ${module_or_path}`);
+        console.log(`Loading wasm from ${module_or_path}`);
     }
     const imports = __wbg_get_imports();
 
