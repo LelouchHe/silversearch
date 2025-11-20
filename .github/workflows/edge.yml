@@ -37,6 +37,11 @@ jobs:
           mv PLUG.md PLUG_SRC.md
           m4 PLUG_SRC.md > PLUG.md
 
+      - name: Build jieba wasm
+        run: |
+          mv tokenizers\jieba-wasm-2.4.0\src\jieba_rs_wasm_bg.wasm jieba_rs_wasm_bg_SRC.wasm
+          m4 jieba_rs_wasm_bg_SRC.wasm > jieba_rs_wasm_bg.wasm
+
       - name: Update release tag
         uses: rickstaa/action-create-tag@v1
         with:
@@ -53,5 +58,6 @@ jobs:
           tag_name: edge
           body: Automated build from commit ${{ github.sha }}
           files: |
-            silversearch-chinese.plug.js
+            silversearch.plug.js
             PLUG.md
+            jieba_rs_wasm_bg.wasm

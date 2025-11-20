@@ -11,6 +11,8 @@ import { getPlugConfig } from "./util/settings.ts";
 import { ResultPage } from "../shared/global.ts";
 import { version } from "../dist/version.ts";
 
+import initJieba from "../tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm.js";
+
 // So this will be a global variable in a service worker, so the lifetime is kind of uncertain, especially if
 // we don't have direct access to events, i.e. we can't trust that this exists AT ALL
 let searchEngine: SearchEngine | null = null;
@@ -57,6 +59,11 @@ export async function init(): Promise<void> {
     // Create it now as all systems should be fully initalized, so we can handle
     // all the queued paths
     await checkIfInitalized();
+
+    // Only init jieba when enabled, to avoid loading unnecessary resources
+    if ((await getPlugConfig()).enableChinese) {
+        await initJieba();
+    }
 }
 
 export async function indexPage({ name }: IndexTreeEvent) {

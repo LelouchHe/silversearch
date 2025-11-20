@@ -1,6 +1,12 @@
-# NOTE
+# NOTE from Silversearch
 
-This is a updated version of [jieba-wasm](https://github.com/fengkx/jieba-wasm/), to make it work with silver bullet plug system
+This is a updated version of [jieba-wasm](https://github.com/fengkx/jieba-wasm/), to make it work with Silver Bullet plug system.
+
+Major changes:
+
+1. use `space.readFile` to load wasm
+2. hard code wasm file path to be `${LIBRARY_PATH}/jieba_rs_wasm_bg.wasm`
+3. instantiate WebAssembly directly from wasm content
 
 # jieba-wasm
 

@@ -2,13 +2,11 @@ import { splitCamelCase, splitHyphens } from "./utils.ts";
 import { QueryCombination } from "minisearch";
 import { extractMdLinks } from "md-link-extractor";
 import { BRACKETS_AND_SPACE, SPACE_OR_PUNCTUATION } from "./global.ts";
-import { Segment, useDefault } from 'segmentit';
+import { cut_for_search } from "../../tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm.js";
 
-const segmentit = useDefault(new Segment());
-
-export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boolean, enableChineseTokenization: boolean }): string[] {
+export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boolean, enableChinese: boolean }): string[] {
     try {
-        const words = tokenizeWords(text);
+        const words = tokenizeWords(text, options.enableChinese);
         let urls: string[] = [];
         if (options.tokenizeUrls) {
             try {
@@ -20,7 +18,7 @@ export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boole
             }
         }
 
-        let tokens = tokenizeTokens(text, { skipChs: !options.enableChineseTokenization });
+        let tokens = tokenizeTokens(text, options.enableChinese);
         tokens = [...tokens.flatMap(token => [
             token,
             ...splitHyphens(token),
@@ -42,13 +40,13 @@ export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boole
     }
 }
 
-export function tokenizeForSearch(text: string, options: { enableChineseTokenization: boolean }): QueryCombination {
+export function tokenizeForSearch(text: string, options: { enableChinese: boolean }): QueryCombination {
     // Extract urls and remove them from the query
     // deno-lint-ignore no-explicit-any
     const urls: string[] = extractMdLinks(text).map((link: any) => link.href);
     text = urls.reduce((acc, url) => acc.replace(url, ''), text);
 
-    const tokens = [...tokenizeTokens(text, { skipChs: !options.enableChineseTokenization }), ...urls].filter(Boolean);
+    const tokens = [...tokenizeTokens(text, options.enableChinese), ...urls].filter(Boolean);
 
     return {
         combineWith: 'OR',
@@ -56,7 +54,7 @@ export function tokenizeForSearch(text: string, options: { enableChineseTokeniza
             { combineWith: 'AND', queries: tokens },
             {
                 combineWith: 'AND',
-                queries: tokenizeWords(text).filter(Boolean),
+                queries: tokenizeWords(text, options.enableChinese).filter(Boolean),
             },
             { combineWith: 'AND', queries: tokens.flatMap(splitHyphens) },
             { combineWith: 'AND', queries: tokens.flatMap(splitCamelCase) },
@@ -64,29 +62,28 @@ export function tokenizeForSearch(text: string, options: { enableChineseTokeniza
     };
 }
 
-function tokenizeWords(text: string, { skipChs = false } = {}): string[] {
-    const tokens = text.split(BRACKETS_AND_SPACE);
-    if (skipChs) return tokens;
-    return tokenizeChsWord(tokens);
+function tokenizeWords(text: string, enableChinese: boolean): string[] {
+    return tokenize(text.split(BRACKETS_AND_SPACE), enableChinese);
 }
 
-function tokenizeTokens(text: string, { skipChs = false } = {}): string[] {
-    const tokens = text.split(SPACE_OR_PUNCTUATION);
-    if (skipChs) return tokens;
-    return tokenizeChsWord(tokens);
+function tokenizeTokens(text: string, enableChinese: boolean): string[] {
+    return tokenize(text.split(SPACE_OR_PUNCTUATION), enableChinese);
 }
 
-function tokenizeChsWord(tokens: string[]): string[] {
-    const result: string[] = [];
-    for (const token of tokens) {
-        // `/\p{Script=Han}/u` includes Japanese/Korean as well
-        if (/[\u4e00-\u9fff]/u.test(token)) {
-            const segments = segmentit.doSegment(token, { simple: true, stripPunctuation : true });
-            result.push(...segments);
-            console.log("SEGMENTS: ", segments);
-        } else {
-            result.push(token);
-        }
+function tokenize(words: string[], enableChinese: boolean): string[] {
+    const tokens: string[] = [];
+    for (const word of words) {
+        tokens.push(...languageTokenize(word, enableChinese));
     }
-    return result;
+    return tokens;
+}
+
+function languageTokenize(word: string, enableChinese: boolean): string[] {
+    // Chinese
+    if (enableChinese && /[\u4e00-\u9fff]/u.test(word)) {
+        return cut_for_search(word, true).filter(t => !/^[\p{P}\s]+$/u.test(t));
+    }
+
+    // default: word as token
+    return [word];
 }

@@ -45,7 +45,9 @@ config.set {
     -- Increases the fuzziness of the full-text search, options are "0", "1", "2"
     fuzziness = "1",
     -- Puts newlines into the excerpts as opposed to rendering it as one continous string
-    renderLineReturnInExcerpts = true
+    renderLineReturnInExcerpts = true,
+    -- Enable Chinese index and search, which loads large data file when enabled
+    enableChinese = false
   }
 }
 ```
