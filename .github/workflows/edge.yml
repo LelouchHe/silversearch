@@ -37,11 +37,6 @@ jobs:
           mv PLUG.md PLUG_SRC.md
           m4 PLUG_SRC.md > PLUG.md
 
-      - name: Build jieba wasm
-        run: |
-          mv jieba_rs_wasm_bg.wasm jieba_rs_wasm_bg_SRC.wasm
-          m4 jieba_rs_wasm_bg_SRC.wasm > jieba_rs_wasm_bg.wasm
-
       - name: Update release tag
         uses: rickstaa/action-create-tag@v1
         with:
