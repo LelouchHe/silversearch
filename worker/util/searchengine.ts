@@ -477,7 +477,7 @@ export class SearchEngine {
     }
 
     private isIndexedPath(path: Path) {
-        return !path.startsWith("_plug/");
+        return !path.startsWith("_plug/") && !path.endsWith(".wasm") && !path.endsWith(".plug.js");
     }
 
     private static getOptions(settings: SilversearchSettings): Options<IndexableEntry> {
