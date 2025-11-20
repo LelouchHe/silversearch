@@ -16,6 +16,7 @@ import initJieba from "../tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm.js";
 // So this will be a global variable in a service worker, so the lifetime is kind of uncertain, especially if
 // we don't have direct access to events, i.e. we can't trust that this exists AT ALL
 let searchEngine: SearchEngine | null = null;
+let jiebaInitialized = false;
 
 type Action = {
     action: "delete" | "index",
@@ -56,14 +57,16 @@ export async function startSearch(): Promise<void> {
 }
 
 export async function init(): Promise<void> {
+    // Only init jieba when enabled, to avoid loading unnecessary resources
+    // jieba is required for indexing and searching, so it needs to load first
+    if (!jiebaInitialized && (await getPlugConfig()).enableChinese) {
+        await initJieba();
+        jiebaInitialized = true;
+    }
+
     // Create it now as all systems should be fully initalized, so we can handle
     // all the queued paths
     await checkIfInitalized();
-
-    // Only init jieba when enabled, to avoid loading unnecessary resources
-    if ((await getPlugConfig()).enableChinese) {
-        await initJieba();
-    }
 }
 
 export async function indexPage({ name }: IndexTreeEvent) {
@@ -85,7 +88,7 @@ export async function deleted(path: Path) {
 }
 
 export async function search(searchTerm: string, singleFilePath?: string): Promise<ResultPage[]> {
-    await checkIfInitalized();
+    await init();
 
     const settings = await getPlugConfig();
 
@@ -101,7 +104,7 @@ export async function reindex() {
     await SearchEngine.deleteCache();
     searchEngine = null;
 
-    await checkIfInitalized();
+    await init();
 }
 
 export async function showVersion() {
