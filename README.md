@@ -46,7 +46,7 @@ config.set {
     fuzziness = "1",
     -- Puts newlines into the excerpts as opposed to rendering it as one continous string
     renderLineReturnInExcerpts = true,
-    -- Enable Chinese index and search, which loads large data file when enabled
+    -- Enable Chinese index and search, which loads large data file only when enabled
     enableChinese = false
   }
 }

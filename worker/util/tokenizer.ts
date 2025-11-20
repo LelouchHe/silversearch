@@ -71,11 +71,7 @@ function tokenizeTokens(text: string, enableChinese: boolean): string[] {
 }
 
 function tokenize(words: string[], enableChinese: boolean): string[] {
-    const tokens: string[] = [];
-    for (const word of words) {
-        tokens.push(...languageTokenize(word, enableChinese));
-    }
-    return tokens;
+    return words.flatMap(word => languageTokenize(word, enableChinese));
 }
 
 function languageTokenize(word: string, enableChinese: boolean): string[] {
