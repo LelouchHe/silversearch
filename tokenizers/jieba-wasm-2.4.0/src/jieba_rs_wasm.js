@@ -183,7 +183,7 @@ export function cut(text, hmm) {
     const ptr0 = passStringToWasm0(text, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.cut(ptr0, len0, isLikeNone(hmm) ? 0xFFFFFF : hmm ? 1 : 0);
-    var v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+    const v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v2;
 }
@@ -196,7 +196,7 @@ export function cut_all(text) {
     const ptr0 = passStringToWasm0(text, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.cut_all(ptr0, len0);
-    var v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+    const v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v2;
 }
@@ -210,7 +210,7 @@ export function cut_for_search(text, hmm) {
     const ptr0 = passStringToWasm0(text, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.cut_for_search(ptr0, len0, isLikeNone(hmm) ? 0xFFFFFF : hmm ? 1 : 0);
-    var v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+    const v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v2;
 }
@@ -235,7 +235,7 @@ export function tokenize(text, mode, hmm) {
     if (ret[3]) {
         throw takeFromExternrefTable0(ret[2]);
     }
-    var v3 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+    const v3 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v3;
 }
@@ -249,8 +249,8 @@ export function tokenize(text, mode, hmm) {
 export function add_word(word, freq, tag) {
     const ptr0 = passStringToWasm0(word, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
-    var ptr1 = isLikeNone(tag) ? 0 : passStringToWasm0(tag, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    var len1 = WASM_VECTOR_LEN;
+    const ptr1 = isLikeNone(tag) ? 0 : passStringToWasm0(tag, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
     const ret = wasm.add_word(ptr0, len0, isLikeNone(freq) ? 0x100000001 : (freq) >>> 0, ptr1, len1);
     return ret >>> 0;
 }
@@ -264,7 +264,7 @@ export function tag(sentence, hmm) {
     const ptr0 = passStringToWasm0(sentence, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.tag(ptr0, len0, isLikeNone(hmm) ? 0xFFFFFF : hmm ? 1 : 0);
-    var v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+    const v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v2;
 }
@@ -366,7 +366,7 @@ function __wbg_get_imports() {
     return imports;
 }
 
-function __wbg_init_memory(imports, memory) {
+function __wbg_init_memory(_imports, _memory) {
 
 }
 
