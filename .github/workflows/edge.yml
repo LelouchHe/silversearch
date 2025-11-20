@@ -39,7 +39,7 @@ jobs:
 
       - name: Build jieba wasm
         run: |
-          mv tokenizers\jieba-wasm-2.4.0\src\jieba_rs_wasm_bg.wasm jieba_rs_wasm_bg_SRC.wasm
+          mv jieba_rs_wasm_bg.wasm jieba_rs_wasm_bg_SRC.wasm
           m4 jieba_rs_wasm_bg_SRC.wasm > jieba_rs_wasm_bg.wasm
 
       - name: Update release tag
