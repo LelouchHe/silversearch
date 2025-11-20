@@ -1,7 +1,7 @@
 import type { Path } from "@silverbulletmd/silverbullet/lib/ref";
 import { NavigationMap } from "../../shared/global.ts";
 
-export const LIBRARY_PATH = "Library/mrmugame/Silversearch";
+export const LIBRARY_PATH = "Library/mrmugame";
 
 export const excerptBefore = 100;
 export const excerptAfter = 300;
