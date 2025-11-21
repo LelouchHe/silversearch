@@ -27,6 +27,7 @@ export async function init() {
 
     try {
         // `initWasm` caches the module internally
+        // only reload the page can reset it
         await initWasm({ module_or_path: cache.data });
     } catch (e) {
         console.error("[Silversearch] Failed to load Chinese tokenizer: ", e);
