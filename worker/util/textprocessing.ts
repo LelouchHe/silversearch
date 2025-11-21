@@ -1,4 +1,3 @@
-import { editor } from "@silverbulletmd/silverbullet/syscalls";
 import { excerptAfter, excerptBefore } from "./global.ts";
 import { Query } from "./query.ts";
 import { getPlugConfig } from "./settings.ts";
@@ -20,6 +19,23 @@ export function stringsToRegex(strings: string[]): RegExp {
         .join('|')})`;
 
     return new RegExp(`${joined}`, 'gui');
+}
+
+function processTextForDisplay(text: string, options: { renderLineReturnInExcerpts: boolean }): string {
+    text = escapeHTML(text);
+
+    if (options.renderLineReturnInExcerpts) {
+        // Remove doubled line returns
+        const lineReturn = new RegExp(/(?:\r\n|\r|\n)/g);
+        text = text
+            .split(lineReturn)
+            .filter(l => l)
+            .join('\n');
+
+        text = text.replaceAll("\n", "<br>");
+    }
+
+    return text.trim();
 }
 
 export async function getMatches(
@@ -67,48 +83,33 @@ export async function getMatches(
         }
     }
 
-    return matches;
+    return matches.map(match => ({
+        ...match,
+        match: processTextForDisplay(match.match, { renderLineReturnInExcerpts: settings.renderLineReturnInExcerpts })
+    }));
 }
 
 export async function makeExcerpt(content: string, offset: number): Promise<ResultExcerpt> {
     const settings = await getPlugConfig();
 
     try {
-        const pos = offset ?? -1;
-        const from = Math.max(0, pos - excerptBefore);
-        const to = Math.min(content.length, pos + excerptAfter);
-        if (pos > -1) {
-            content =
-                (from > 0 ? '…' : '') +
-                content.slice(from, to).trim() +
-                (to < content.length - 1 ? '…' : '');
-        } else {
-            content = content.slice(0, excerptAfter);
-        }
+        const from = Math.max(0, offset - excerptBefore);
+        const to = Math.min(content.length, offset + excerptAfter);
+
+        content =
+            (from > 0 ? '…' : '') +
+            content.slice(from, to).trim() +
+            (to < content.length - 1 ? '…' : '');
+
         if (settings.renderLineReturnInExcerpts) {
-            const lineReturn = new RegExp(/(?:\r\n|\r|\n)/g);
-            // Remove multiple line returns
-            content = content
-                .split(lineReturn)
-                .filter(l => l)
-                .join('\n');
-
-            const last = content.lastIndexOf('\n', pos - from);
-
+            const last = content.lastIndexOf('\n', offset - from);
             if (last > 0) {
-                content = content.slice(last);
+                content = content.slice(last + 1);
             }
         }
 
-        content = escapeHTML(content);
-
-        if (settings.renderLineReturnInExcerpts) {
-            content = content.trim().replaceAll('\n', '<br>');
-        }
-
-        return { excerpt: content, offset: offset };
+        return { excerpt: processTextForDisplay(content, { renderLineReturnInExcerpts: settings.renderLineReturnInExcerpts }), offset: offset };
     } catch (e) {
-        await editor.flashNotification("Silversearch - Error while creating excerpt, see developer console", "error");
         console.error("[Silversearch] Error while creating excerpt", e);
         return { excerpt: "", offset: 0 };
     }

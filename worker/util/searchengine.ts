@@ -351,7 +351,7 @@ export class SearchEngine {
             } else {
                 excerpts = [await makeExcerpt(
                     note.content,
-                    matches[0]?.offset ?? -1
+                    matches[0]?.offset ?? 0
                 )];
             }
 
