@@ -8,13 +8,8 @@ export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boole
         const words = tokenizeWords(text);
         let urls: string[] = [];
         if (options.tokenizeUrls) {
-            try {
-                // Would love to use silverbullet here, but we can't introduce async here
-                // deno-lint-ignore no-explicit-any
-                urls = extractMdLinks(text).map((link: any) => link.href);
-            } catch (e) {
-                console.log("[Silversearch] Error extracting urls", e);
-            }
+            // Would love to use silverbullet here, but we can't introduce async here
+            urls = extractMdLinks(text).map(link => link.href);
         }
 
         let tokens = tokenizeTokens(text, { skipChs: true });

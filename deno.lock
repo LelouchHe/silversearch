@@ -5,7 +5,7 @@
     "jsr:@valibot/valibot@^1.1.0": "1.1.0",
     "npm:@sveltejs/vite-plugin-svelte@^5.1.0": "5.1.0_svelte@5.34.6__acorn@8.15.0_vite@6.3.5__@types+node@22.18.0__picomatch@4.0.2_@types+node@22.18.0",
     "npm:@types/node@^22.13.4": "22.18.0",
-    "npm:md-link-extractor@1.1.1": "1.1.1",
+    "npm:md-link-extractor@1.2.0": "1.2.0",
     "npm:minisearch@7.1.2": "7.1.2",
     "npm:search-query-parser@1.6.0": "1.6.0",
     "npm:svelte@^5.34.3": "5.34.6_acorn@8.15.0",
@@ -412,8 +412,8 @@
         "@jridgewell/sourcemap-codec"
       ]
     },
-    "md-link-extractor@1.1.1": {
-      "integrity": "sha512-Ac2Qeh0l4MWtctOeBumD553Izja2VUt8EISMp6NPxgPVehMQXhjKCjGB1ZcDDlhTDDin4Nr1OoCrKdsYanGwvA=="
+    "md-link-extractor@1.2.0": {
+      "integrity": "sha512-iTxj+iGrck0NM16T01bDL99lUiinFofbjvyn2SEKHktcbig0eqrihDV3WzyvJYeeyzKGr7EaA6Mm7nOf4LmcMA=="
     },
     "minisearch@7.1.2": {
       "integrity": "sha512-R1Pd9eF+MD5JYDDSPAp/q1ougKglm14uEkPMvQ/05RGmx6G9wvmLTrTI/Q5iPNJLYqNdsDQ7qTGIcNWR+FrHmA=="
@@ -576,7 +576,7 @@
     "dependencies": [
       "jsr:@silverbulletmd/silverbullet@2",
       "jsr:@valibot/valibot@^1.1.0",
-      "npm:md-link-extractor@1.1.1",
+      "npm:md-link-extractor@1.2.0",
       "npm:minisearch@7.1.2",
       "npm:search-query-parser@1.6.0"
     ],
