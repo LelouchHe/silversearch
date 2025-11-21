@@ -110,8 +110,10 @@ export async function reindex() {
     await SearchEngine.deleteCache();
     searchEngine = null;
 
-    await resetChinese();
-
+    if ((await getPlugConfig()).enableChinese) {
+        await resetChinese();
+    };
+    
     await init();
 }
 

@@ -76,5 +76,9 @@ type ExtractionResult = {
 };
 ```
 
+## Note on Chinese tokenizer
+
+Currently, [jieba-wasm](https://github.com/fengkx/jieba-wasm/) is used as Chinese tokenizer. In rare scenario where it's upgraded to a new version, a reload + reindex is required for best results.
+
 ## LICENSE
 Silversearch is licensed under [GPL-3](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)).

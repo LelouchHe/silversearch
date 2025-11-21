@@ -1,5 +1,5 @@
 // @deno-types="./jieba-wasm-2.4.0/jieba_rs_wasm.d.ts"
-import initWasm, { cut_for_search } from "./jieba-wasm-2.4.0/jieba_rs_wasm.js";
+import initWasm, { cut_for_search, InitOutput } from "./jieba-wasm-2.4.0/jieba_rs_wasm.js";
 
 import { clientStore, space } from "@silverbulletmd/silverbullet/syscalls";
 import { LIBRARY_PATH } from "../../worker/util/global.ts";
@@ -8,14 +8,20 @@ const wasmPath = `${LIBRARY_PATH}/silversearch-tokenizer-chinese.wasm`;
 const cacheKey = "silversearch-tokenizer-chinese";
 const cacheVersion = 1;
 
+let wasm: InitOutput | null = null;
+
 interface Cache {
     version: number;
     data: Uint8Array;
 }
 
 export async function init() {
+    if (wasm) {
+        return true;
+    }
+
     // This cache is per-browser, so multiple tabs share the same data
-    let cache: Cache | null = await clientStore.get(cacheKey);
+    let cache: Cache | undefined = await clientStore.get(cacheKey);
     if (!cache || cache.version !== cacheVersion) {
         console.log(`[Silversearch] Chinese tokenizer not found in cache, loading from ${wasmPath}`);
         cache = {
@@ -27,10 +33,9 @@ export async function init() {
     }
 
     try {
-        // jieba wasm module is cached in `initWasm`, even for different data
+        // jieba wasm instance is cached in `initWasm`, even for different data
         // it's created in the first call
-        // when upgrading it, users have to reload the page or open a new tab
-        await initWasm({ module_or_path: cache.data });
+        wasm = await initWasm({ module_or_path: cache.data });
     } catch (e) {
         console.error("[Silversearch] Failed to load Chinese tokenizer: ", e);
         return false;
@@ -40,6 +45,7 @@ export async function init() {
 }
 
 export async function reset() {
+    wasm = null;
     await clientStore.del(cacheKey);
 }
 
