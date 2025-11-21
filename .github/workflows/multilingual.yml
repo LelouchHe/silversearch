@@ -1,4 +1,4 @@
-name: Multilingual Support
+name: Multilingual
 on:
   push:
     branches: multilingual-support
