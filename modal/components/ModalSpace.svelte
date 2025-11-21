@@ -54,6 +54,8 @@
     }
 
     async function openSelected(openInNewTab: boolean) {
+        if (results.length == 0) return;
+
         const result = results[selectedIndex];
         const offset = result.matches?.[0]?.offset ?? 0;
 
