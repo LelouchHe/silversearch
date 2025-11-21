@@ -29,13 +29,14 @@ export async function init() {
             data: await space.readFile(wasmPath),
         };
         await clientStore.set(cacheKey, cache);
-        console.log(`[Silversearch] Chinese tokenizer loaded, size: ${cache.data.length / 1024} KB`);
+        console.log(`[Silversearch] Chinese tokenizer loaded, size: ${Math.floor(cache.data.length / 1024)} KB`);
     }
 
     try {
         // jieba wasm instance is cached in `initWasm`, even for different data
         // it's created in the first call
         wasm = await initWasm({ module_or_path: cache.data });
+        console.log("[Silversearch] Chinese tokenizer initialized");
     } catch (e) {
         console.error("[Silversearch] Failed to load Chinese tokenizer: ", e);
         return false;
