@@ -2,7 +2,7 @@ import { splitCamelCase, splitHyphens } from "./utils.ts";
 import { QueryCombination } from "minisearch";
 import { extractMdLinks } from "md-link-extractor";
 import { BRACKETS_AND_SPACE, SPACE_OR_PUNCTUATION } from "./global.ts";
-import { cut_for_search } from "../../tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm.js";
+import { cut_for_search } from "../../tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm.ts";
 
 export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boolean, enableChinese: boolean }): string[] {
     try {

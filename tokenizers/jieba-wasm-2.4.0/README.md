@@ -7,6 +7,7 @@ Major changes:
 1. use `space.readFile` to load wasm
 2. hard code wasm file path to be `${LIBRARY_PATH}/jieba_rs_wasm_bg.wasm`
 3. instantiate WebAssembly directly from wasm content
+4. add `jieba_rs_wasm.ts` for type info
 
 # jieba-wasm
 

@@ -11,12 +11,12 @@ import { getPlugConfig } from "./util/settings.ts";
 import { ResultPage } from "../shared/global.ts";
 import { version } from "../dist/version.ts";
 
-import initJieba from "../tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm.js";
+import initJieba, { InitOutput } from "../tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm.ts";
 
 // So this will be a global variable in a service worker, so the lifetime is kind of uncertain, especially if
 // we don't have direct access to events, i.e. we can't trust that this exists AT ALL
 let searchEngine: SearchEngine | null = null;
-let jiebaInitialized = false;
+let jiebaModule: InitOutput | null = null;
 
 type Action = {
     action: "delete" | "index",
@@ -24,6 +24,22 @@ type Action = {
 }
 
 let actionQueue: Action[] = [];
+
+async function checkIfJiebaLoaded() {
+    if (!(await getPlugConfig()).enableChinese || jiebaModule) {
+        return
+    };
+
+    await editor.flashNotification("Silversearch - Loading Chinese data file, this may take some time");
+    try {
+        jiebaModule = await initJieba();
+        await editor.flashNotification("Silversearch - Chinese data file is loaded successfully");
+    } catch (e) {
+        await editor.flashNotification("Silversearch - Failed to load Chinese data file", "error");
+        console.error("[Silversearch] Failed to load jieba module", e);
+        jiebaModule = null;
+    }
+}
 
 async function checkIfInitalized() {
     if (searchEngine) return;
@@ -59,10 +75,7 @@ export async function startSearch(): Promise<void> {
 export async function init(): Promise<void> {
     // Only init jieba when enabled, to avoid loading unnecessary resources
     // jieba is required for indexing and searching, so it needs to load first
-    if (!jiebaInitialized && (await getPlugConfig()).enableChinese) {
-        await initJieba();
-        jiebaInitialized = true;
-    }
+    await checkIfJiebaLoaded();
 
     // Create it now as all systems should be fully initalized, so we can handle
     // all the queued paths
