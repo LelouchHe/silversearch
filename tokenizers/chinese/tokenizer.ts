@@ -14,6 +14,7 @@ interface Cache {
 }
 
 export async function init() {
+    // This cache is per-browser, so multiple tabs share the same data
     let cache: Cache | null = await clientStore.get(cacheKey);
     if (!cache || cache.version !== cacheVersion) {
         console.log(`[Silversearch] Chinese tokenizer not found in cache, loading from ${wasmPath}`);
@@ -26,8 +27,9 @@ export async function init() {
     }
 
     try {
-        // `initWasm` caches the module internally
-        // only reload the page can reset it
+        // jieba wasm module is cached in `initWasm`, even for different data
+        // it's created in the first call
+        // when upgrading it, users have to reload the page or open a new tab
         await initWasm({ module_or_path: cache.data });
     } catch (e) {
         console.error("[Silversearch] Failed to load Chinese tokenizer: ", e);
