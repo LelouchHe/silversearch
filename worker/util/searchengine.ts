@@ -3,7 +3,7 @@ import { DocumentMeta, PageMeta } from "@silverbulletmd/silverbullet/type/index"
 import { SearchResult, Options, default as MiniSearch } from "minisearch"
 import { Query } from "./query.ts";
 import { getPlugConfig, SilversearchSettings } from "./settings.ts";
-import { tokenizeForIndexing, tokenizeForSearch } from "./tokenizer.ts";
+import { tokenizeForIndexing, tokenizeForSearch, Tokenizer } from "./tokenizer.ts";
 import { getGroups, removeDiacritics, removeStrayDiacritics, stripMarkdownCharacters } from "./utils.ts";
 import { CacheEntry, IndexableEntry, RecencyCutoff } from "./global.ts";
 import { getMatches, makeExcerpt } from "./textprocessing.ts";
@@ -17,10 +17,12 @@ const cacheVersion = 4;
 export class SearchEngine {
     private minisearch: MiniSearch;
     private entryCache: Map<string, CacheEntry>;
+    private tokenizers: Tokenizer[];
 
     constructor(settings: SilversearchSettings) {
-        this.minisearch = new MiniSearch(SearchEngine.getOptions(settings));
+        this.minisearch = new MiniSearch(SearchEngine.getOptions(settings, []));
         this.entryCache = new Map();
+        this.tokenizers = [];
     }
 
     public static async loadFromCache(settings: SilversearchSettings): Promise<SearchEngine | null> {
@@ -35,7 +37,11 @@ export class SearchEngine {
 
         const searchEngine = new SearchEngine(settings);
 
-        searchEngine.minisearch = await MiniSearch.loadJSONAsync(cache.minisearch, SearchEngine.getOptions(settings));
+        searchEngine.tokenizers = (await Promise.all(settings.tokenizers.map(async path => {
+            return await Tokenizer.loadFromPath(path);
+        }))).filter(t => t !== null);
+
+        searchEngine.minisearch = await MiniSearch.loadJSONAsync(cache.minisearch, SearchEngine.getOptions(settings, searchEngine.tokenizers));
 
         searchEngine.entryCache = new Map(cache.entries)
 
@@ -137,7 +143,7 @@ export class SearchEngine {
             "2": 0.2
         }[settings.fuzziness];
 
-        const searchTokens = tokenizeForSearch(query.segmentsToStr())
+        const searchTokens = tokenizeForSearch(query.segmentsToStr(), { tokenizers: this.tokenizers })
 
         let results = this.minisearch.search(searchTokens, {
             prefix: term => term.length >= options.prefixLength,
@@ -480,9 +486,9 @@ export class SearchEngine {
         return !path.endsWith(".plug.js");
     }
 
-    private static getOptions(settings: SilversearchSettings): Options<IndexableEntry> {
+    private static getOptions(settings: SilversearchSettings, tokenizers: Tokenizer[]): Options<IndexableEntry> {
         return {
-            tokenize: (text: string) => tokenizeForIndexing(text, { tokenizeUrls: settings.tokenizeUrls }),
+            tokenize: (text: string) => tokenizeForIndexing(text, { tokenizers, tokenizeUrls: settings.tokenizeUrls }),
             processTerm: (term: string) => (settings.ignoreDiacritics
                 ? removeDiacritics(term, settings.ignoreArabicDiacritics)
                 : term

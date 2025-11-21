@@ -2,10 +2,73 @@ import { splitCamelCase, splitHyphens } from "./utils.ts";
 import { QueryCombination } from "minisearch";
 import { extractMdLinks } from "md-link-extractor";
 import { BRACKETS_AND_SPACE, SPACE_OR_PUNCTUATION } from "./global.ts";
+import * as v from "@valibot/valibot"
 
-export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boolean }): string[] {
+type TokenizerImplementation = {
+    init: () => Promise<void>,
+    isTokenizable: (text: string) => boolean,
+    tokenize: (text: string) => string[]
+}
+
+const tokenizerImplementationSchema = v.strictObject({
+    init: v.pipe(
+        v.function(),
+        v.args(v.tuple([])),
+        v.returnsAsync(v.void())
+    ),
+    isTokenizable: v.pipe(
+        v.function(),
+        v.args(v.tuple([v.string()])),
+        v.returns(v.boolean())
+    ),
+    tokenize: v.pipe(
+        v.function(),
+        v.args(v.tuple([v.string()])),
+        v.returns(v.array(v.string()))
+    )
+});
+
+export class Tokenizer {
+    private constructor(private readonly implementation: TokenizerImplementation) {}
+
+    public static async loadFromPath(path: string): Promise<Tokenizer | null> {
+        let module;
+        try {
+            module = await import(`/.fs/${path}`);
+        } catch {
+            console.warn(`[Silversearch] Failed to load tokenizer at ${path}. Maybe the path is wrong?`);
+            return null;
+        }
+
+        const result = v.safeParse(tokenizerImplementationSchema, module);
+
+        if (result.success) {
+            const tokenizer = new Tokenizer(result.output satisfies TokenizerImplementation);
+            await tokenizer.implementation.init();
+
+            return tokenizer;
+        } else {
+            console.warn(`[Silversearch] Failed to load tokenizer at ${path}. \n ${v.summarize(result.issues)}`);
+            return null;
+        }
+    }
+
+    public tryTokenization(text: string): string[] | null {
+        try {
+            if (this.implementation.isTokenizable(text)) {
+                return this.implementation.tokenize(text);
+            }
+        } catch (e) {
+            console.warn(`[Silversearch] Tokenizer failed with error ${e}. Ignoring!`);
+        }
+
+        return null;
+    }
+}
+
+export function tokenizeForIndexing(text: string, options: { tokenizers: Tokenizer[], tokenizeUrls: boolean }): string[] {
     try {
-        const words = tokenizeWords(text);
+        const words = tokenizeWords(text, options.tokenizers);
 
         let urls: string[] = [];
         if (options.tokenizeUrls) {
@@ -40,7 +103,7 @@ export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boole
     }
 }
 
-export function tokenizeForSearch(text: string): QueryCombination {
+export function tokenizeForSearch(text: string, options: { tokenizers: Tokenizer[] }): QueryCombination {
     // Extract urls and remove them from the query
     const urls: string[] = extractMdLinks(text).map(link => link.href);
     text = urls.reduce((acc, url) => acc.replace(url, ""), text);
@@ -51,24 +114,23 @@ export function tokenizeForSearch(text: string): QueryCombination {
         combineWith: 'OR',
         queries: [
             { combineWith: 'AND', queries: tokens },
-            { combineWith: 'AND', queries: tokenizeWords(text) },
+            { combineWith: 'AND', queries: tokenizeWords(text, options.tokenizers) },
             { combineWith: 'AND', queries: tokens.flatMap(splitHyphens) },
             { combineWith: 'AND', queries: tokens.flatMap(splitCamelCase) },
         ],
     };
 }
 
-
-function tokenizeWords(text: string): string[] {
-    const tokens = text.split(BRACKETS_AND_SPACE).filter(Boolean);
-    return tokenizeLanguage(tokens);
+function tokenizeWords(text: string, tokenizers: Tokenizer[]): string[] {
+    return tokenizeLanguage(text, tokenizers) ?? text.split(BRACKETS_AND_SPACE).filter(Boolean);
 }
 
 function tokenizeTokens(text: string): string[] {
     return text.split(SPACE_OR_PUNCTUATION).filter(Boolean);
-    //return tokenizeLanguage(tokens);
 }
 
-function tokenizeLanguage(tokens: string[]): string[] {
-    return tokens;
+function tokenizeLanguage(text: string, tokenizers: Tokenizer[]): string[] | null {
+    const result = tokenizers.flatMap(tokenizer => tokenizer.tryTokenization(text) ?? [])
+
+    return result.length === 0 ? null : result;
 }
