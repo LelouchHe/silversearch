@@ -39,18 +39,18 @@ export async function extractContentByPath(path: Path, cachedMeta?: PageMeta | D
         try {
             results = await events.dispatchEvent("silversearch:index", { meta }) as unknown[];
         } catch {
-            console.log(`[silversearch] Eventhandler threw error. Discarding it.`)
+            console.warn(`[silversearch] Eventhandler threw error. Discarding it.`)
             return null;
         }
 
         if (results.length === 0) return null;
         else if (results.length > 1) {
-            console.log(`[silversearch] We got multiple responses while indexing ${meta.name}. Can't handle that.`);
+            console.warn(`[silversearch] We got multiple responses while indexing ${meta.name}. Can't handle that.`);
         }
 
         const result = v.safeParse(extractionResultSchema, results[0]);
         if (!result.success) {
-            console.log(`[silversearch] Eventhandler didn't return well-formed result. Discarding it.`)
+            console.warn(`[silversearch] Eventhandler didn't return well-formed result. Discarding it.`)
             return null;
         }
 

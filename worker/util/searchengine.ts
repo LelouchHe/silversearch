@@ -103,7 +103,7 @@ export class SearchEngine {
 
                 if (progressCallback) progressCallback(++done, paths.length);
             } catch {
-                console.log(`[Silversearch] Failed to index ${getNameFromPath(path)}. Skipping!`);
+                console.warn(`[Silversearch] Failed to index ${getNameFromPath(path)}. Skipping!`);
             }
         }
 
@@ -119,7 +119,7 @@ export class SearchEngine {
             try {
                 this.minisearch.discard(path);
             } catch {
-                console.log("[Silversearch] Something went wrong. Failed to delete page")
+                console.error("[Silversearch] Something went wrong. Failed to delete page")
             }
         }
 
