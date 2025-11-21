@@ -11,6 +11,8 @@ import { getPlugConfig } from "./util/settings.ts";
 import { ResultPage } from "../shared/global.ts";
 import { version } from "../dist/version.ts";
 
+import { init as initChinese, reset as resetChinese } from "../tokenizers/chinese/tokenizer.ts";
+
 // So this will be a global variable in a service worker, so the lifetime is kind of uncertain, especially if
 // we don't have direct access to events, i.e. we can't trust that this exists AT ALL
 let searchEngine: SearchEngine | null = null;
@@ -21,6 +23,16 @@ type Action = {
 }
 
 let actionQueue: Action[] = [];
+
+async function checkIfChineseLoaded() {
+    if (!(await getPlugConfig()).enableChinese) {
+        return
+    };
+
+    if (!(await initChinese())) {
+        await editor.flashNotification("Silversearch - Failed to load Chinese tokenizer", "error");
+    }
+}
 
 async function checkIfInitalized() {
     if (searchEngine) return;
@@ -54,6 +66,10 @@ export async function startSearch(): Promise<void> {
 }
 
 export async function init(): Promise<void> {
+    // Chinese tokenizer is required for indexing and searching when enabled
+    // need to load it first
+    await checkIfChineseLoaded();
+
     // Create it now as all systems should be fully initalized, so we can handle
     // all the queued paths
     await checkIfInitalized();
@@ -78,7 +94,7 @@ export async function deleted(path: Path) {
 }
 
 export async function search(searchTerm: string, singleFilePath?: string): Promise<ResultPage[]> {
-    await checkIfInitalized();
+    await init();
 
     const settings = await getPlugConfig();
 
@@ -94,7 +110,11 @@ export async function reindex() {
     await SearchEngine.deleteCache();
     searchEngine = null;
 
-    await checkIfInitalized();
+    if ((await getPlugConfig()).enableChinese) {
+        await resetChinese();
+    };
+    
+    await init();
 }
 
 export async function showVersion() {

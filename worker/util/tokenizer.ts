@@ -2,10 +2,11 @@ import { splitCamelCase, splitHyphens } from "./utils.ts";
 import { QueryCombination } from "minisearch";
 import { extractMdLinks } from "md-link-extractor";
 import { BRACKETS_AND_SPACE, SPACE_OR_PUNCTUATION } from "./global.ts";
+import { tokenize as tokenizeChinese, isTarget as isChinese } from "../../tokenizers/chinese/tokenizer.ts";
 
-export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boolean }): string[] {
+export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boolean, enableChinese: boolean }): string[] {
     try {
-        const words = tokenizeWords(text);
+        const words = tokenizeWords(text, options.enableChinese);
         let urls: string[] = [];
         if (options.tokenizeUrls) {
             try {
@@ -17,7 +18,7 @@ export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boole
             }
         }
 
-        let tokens = tokenizeTokens(text, { skipChs: true });
+        let tokens = tokenizeTokens(text, options.enableChinese);
         tokens = [...tokens.flatMap(token => [
             token,
             ...splitHyphens(token),
@@ -39,13 +40,13 @@ export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boole
     }
 }
 
-export function tokenizeForSearch(text: string): QueryCombination {
+export function tokenizeForSearch(text: string, options: { enableChinese: boolean }): QueryCombination {
     // Extract urls and remove them from the query
     // deno-lint-ignore no-explicit-any
     const urls: string[] = extractMdLinks(text).map((link: any) => link.href);
     text = urls.reduce((acc, url) => acc.replace(url, ''), text);
 
-    const tokens = [...tokenizeTokens(text), ...urls].filter(Boolean);
+    const tokens = [...tokenizeTokens(text, options.enableChinese), ...urls].filter(Boolean);
 
     return {
         combineWith: 'OR',
@@ -53,7 +54,7 @@ export function tokenizeForSearch(text: string): QueryCombination {
             { combineWith: 'AND', queries: tokens },
             {
                 combineWith: 'AND',
-                queries: tokenizeWords(text).filter(Boolean),
+                queries: tokenizeWords(text, options.enableChinese).filter(Boolean),
             },
             { combineWith: 'AND', queries: tokens.flatMap(splitHyphens) },
             { combineWith: 'AND', queries: tokens.flatMap(splitCamelCase) },
@@ -61,19 +62,24 @@ export function tokenizeForSearch(text: string): QueryCombination {
     };
 }
 
-function tokenizeWords(text: string, { skipChs = false } = {}): string[] {
-    const tokens = text.split(BRACKETS_AND_SPACE);
-    if (skipChs) return tokens;
-    return tokenizeChsWord(tokens);
+function tokenizeWords(text: string, enableChinese: boolean): string[] {
+    return tokenize(text.split(BRACKETS_AND_SPACE), enableChinese);
 }
 
-function tokenizeTokens(text: string, { skipChs = false } = {}): string[] {
-    const tokens = text.split(SPACE_OR_PUNCTUATION);
-    if (skipChs) return tokens;
-    return tokenizeChsWord(tokens);
+function tokenizeTokens(text: string, enableChinese: boolean): string[] {
+    return tokenize(text.split(SPACE_OR_PUNCTUATION), enableChinese);
 }
 
-function tokenizeChsWord(tokens: string[]): string[] {
-    // TODO: Tokenize Chineese
-    return tokens;
+function tokenize(words: string[], enableChinese: boolean): string[] {
+    return words.flatMap(word => languageTokenize(word, enableChinese));
+}
+
+function languageTokenize(word: string, enableChinese: boolean): string[] {
+    // Chinese
+    if (enableChinese && isChinese(word)) {
+        return tokenizeChinese(word);
+    }
+
+    // default: word as token
+    return [word];
 }

@@ -2,3 +2,4 @@ node_modules/
 dist/
 .vscode/
 silversearch.plug.js*
+silversearch-tokenizer-chinese.wasm

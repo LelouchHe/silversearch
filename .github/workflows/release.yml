@@ -45,5 +45,7 @@ jobs:
         with:
           draft: false
           files: |
-            silversearch.plug.js
             PLUG.md
+            silversearch.plug.js
+            silversearch-tokenizer-chinese.wasm
+            

@@ -1,7 +1,7 @@
 {
     "tasks": {
-        "build": "npm run build -- && ./scripts/update_version.sh && deno check -c deno.json && deno run -A https://github.com/silverbulletmd/silverbullet/releases/download/edge/plug-compile.js --info -c deno.json silversearch.plug.yaml",
-        "debug": "npm run build -- && ./scripts/update_version.sh && deno check -c deno.json && deno run -A https://github.com/silverbulletmd/silverbullet/releases/download/edge/plug-compile.js --debug -c deno.json silversearch.plug.yaml"
+        "build": "npm run build -- && deno run -A ./scripts/pre_compile.ts && deno check -c deno.json && deno run -A https://github.com/silverbulletmd/silverbullet/releases/download/edge/plug-compile.js --info -c deno.json silversearch.plug.yaml",
+        "debug": "npm run build -- && deno run -A ./scripts/pre_compile.ts && deno check -c deno.json && deno run -A https://github.com/silverbulletmd/silverbullet/releases/download/edge/plug-compile.js --debug -c deno.json silversearch.plug.yaml"
     },
     "imports": {
         "minisearch": "npm:minisearch@7.1.2",

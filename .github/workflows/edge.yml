@@ -53,5 +53,6 @@ jobs:
           tag_name: edge
           body: Automated build from commit ${{ github.sha }}
           files: |
-            silversearch.plug.js
             PLUG.md
+            silversearch.plug.js
+            silversearch-tokenizer-chinese.wasm

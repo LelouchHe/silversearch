@@ -45,7 +45,9 @@ config.set {
     -- Increases the fuzziness of the full-text search, options are "0", "1", "2"
     fuzziness = "1",
     -- Puts newlines into the excerpts as opposed to rendering it as one continous string
-    renderLineReturnInExcerpts = true
+    renderLineReturnInExcerpts = true,
+    -- Enable Chinese index and search. When true, it loads large tokenizer files.
+    enableChinese = false
   }
 }
 ```
@@ -73,6 +75,10 @@ type ExtractionResult = {
   navigationMap?: NavigationMap;
 };
 ```
+
+## Note on Chinese tokenizer
+
+Currently, [jieba-wasm](https://github.com/fengkx/jieba-wasm/) is used as Chinese tokenizer. In rare scenario where it's upgraded to a new version, a reload + reindex is required for best results.
 
 ## LICENSE
 Silversearch is licensed under [GPL-3](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)).
