@@ -1,7 +1,7 @@
-name: Chinese Tokenizer
+name: Multilingual Support
 on:
   push:
-    branches: chinese-tokenizer
+    branches: multilingual-support
 
 jobs:
   publish:
@@ -40,7 +40,7 @@ jobs:
       - name: Update release tag
         uses: rickstaa/action-create-tag@v1
         with:
-          tag: "chinese-tokenizer"
+          tag: "multilingual"
           force_push_tag: true
 
       - name: Release
@@ -50,7 +50,7 @@ jobs:
         with:
           draft: false
           prerelease: true
-          tag_name: chinese-tokenizer
+          tag_name: multilingual
           body: Automated build from commit ${{ github.sha }}
           files: |
             PLUG.md
