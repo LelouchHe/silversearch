@@ -55,4 +55,4 @@ jobs:
           files: |
             PLUG.md
             silversearch.plug.js
-            jieba_rs_wasm_bg.wasm
+            silversearch-tokenizer-chinese.wasm

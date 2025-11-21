@@ -2,7 +2,7 @@ import { splitCamelCase, splitHyphens } from "./utils.ts";
 import { QueryCombination } from "minisearch";
 import { extractMdLinks } from "md-link-extractor";
 import { BRACKETS_AND_SPACE, SPACE_OR_PUNCTUATION } from "./global.ts";
-import { cut_for_search } from "../../tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm.ts";
+import { tokenize as tokenizeChinese, isTarget as isChinese } from "../../tokenizers/chinese/tokenizer.ts";
 
 export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boolean, enableChinese: boolean }): string[] {
     try {
@@ -76,8 +76,8 @@ function tokenize(words: string[], enableChinese: boolean): string[] {
 
 function languageTokenize(word: string, enableChinese: boolean): string[] {
     // Chinese
-    if (enableChinese && /[\u4e00-\u9fff]/u.test(word)) {
-        return cut_for_search(word, true).filter(t => !/^[\p{P}\s]+$/u.test(t));
+    if (enableChinese && isChinese(word)) {
+        return tokenizeChinese(word);
     }
 
     // default: word as token

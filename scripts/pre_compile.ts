@@ -31,9 +31,9 @@ console.log(`Building the version file with version: ${version}`);
 const content = `export const version = "${version}";\n`;
 await Deno.writeTextFile("./dist/version.ts", content);
 
-console.log("Copying jieba wasm to root folder");
+console.log("Copying Chinese tokenizer wasm to root folder");
 
 await Deno.copyFile(
-  "./tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm_bg.wasm",
-  "./jieba_rs_wasm_bg.wasm"
+  "./tokenizers/chinese/jieba-wasm-2.4.0/jieba_rs_wasm_bg.wasm",
+  "./silversearch-tokenizer-chinese.wasm"
 );

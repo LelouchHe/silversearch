@@ -1,6 +1,3 @@
-import { space } from "@silverbulletmd/silverbullet/syscalls";
-import { LIBRARY_PATH } from "../../../worker/util/global.ts";
-
 let wasm;
 
 let cachedUint8ArrayMemory0 = null;
@@ -307,10 +304,6 @@ async function __wbg_load(module, imports) {
         const bytes = await module.arrayBuffer();
         return await WebAssembly.instantiate(bytes, imports);
 
-    } else if (module instanceof Uint8Array) {
-        // Silversearch CHANGE: load wasm from data directly
-        console.log(`Instantiate wasm. size: ${module.length}`);
-        return await WebAssembly.instantiate(module, imports);
     } else {
         const instance = await WebAssembly.instantiate(module, imports);
 
@@ -426,15 +419,12 @@ async function __wbg_init(module_or_path) {
     }
 
     if (typeof module_or_path === 'undefined') {
-        // Silversearch CHANGE: use library path for wasm file
-        module_or_path = `${LIBRARY_PATH}/jieba_rs_wasm_bg.wasm`;
-        console.log(`Loading wasm from ${module_or_path}`);
+        module_or_path = new URL('jieba_rs_wasm_bg.wasm', import.meta.url);
     }
     const imports = __wbg_get_imports();
 
     if (typeof module_or_path === 'string' || (typeof Request === 'function' && module_or_path instanceof Request) || (typeof URL === 'function' && module_or_path instanceof URL)) {
-        // Silversearch CHANGE: use `space.readFile` to load wasm
-        module_or_path = space.readFile(module_or_path);
+        module_or_path = fetch(module_or_path);
     }
 
     __wbg_init_memory(imports);

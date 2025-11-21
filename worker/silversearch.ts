@@ -11,12 +11,11 @@ import { getPlugConfig } from "./util/settings.ts";
 import { ResultPage } from "../shared/global.ts";
 import { version } from "../dist/version.ts";
 
-import initJieba, { InitOutput } from "../tokenizers/jieba-wasm-2.4.0/src/jieba_rs_wasm.ts";
+import { init as initChinese, reset as resetChinese } from "../tokenizers/chinese/tokenizer.ts";
 
 // So this will be a global variable in a service worker, so the lifetime is kind of uncertain, especially if
 // we don't have direct access to events, i.e. we can't trust that this exists AT ALL
 let searchEngine: SearchEngine | null = null;
-let jiebaModule: InitOutput | null = null;
 
 type Action = {
     action: "delete" | "index",
@@ -25,19 +24,13 @@ type Action = {
 
 let actionQueue: Action[] = [];
 
-async function checkIfJiebaLoaded() {
-    if (!(await getPlugConfig()).enableChinese || jiebaModule) {
+async function checkIfChineseLoaded() {
+    if (!(await getPlugConfig()).enableChinese) {
         return
     };
 
-    await editor.flashNotification("Silversearch - Loading Chinese data file, this may take some time");
-    try {
-        jiebaModule = await initJieba();
-        await editor.flashNotification("Silversearch - Chinese data file is loaded successfully");
-    } catch (e) {
-        await editor.flashNotification("Silversearch - Failed to load Chinese data file", "error");
-        console.error("[Silversearch] Failed to load jieba module", e);
-        jiebaModule = null;
+    if (!(await initChinese())) {
+        await editor.flashNotification("Silversearch - Failed to load Chinese tokenizer", "error");
     }
 }
 
@@ -73,9 +66,9 @@ export async function startSearch(): Promise<void> {
 }
 
 export async function init(): Promise<void> {
-    // Only init jieba when enabled, to avoid loading unnecessary resources
-    // jieba is required for indexing and searching, so it needs to load first
-    await checkIfJiebaLoaded();
+    // Chinese tokenizer is required for indexing and searching when enabled
+    // need to load it first
+    await checkIfChineseLoaded();
 
     // Create it now as all systems should be fully initalized, so we can handle
     // all the queued paths
@@ -116,6 +109,8 @@ export async function search(searchTerm: string, singleFilePath?: string): Promi
 export async function reindex() {
     await SearchEngine.deleteCache();
     searchEngine = null;
+
+    await resetChinese();
 
     await init();
 }
