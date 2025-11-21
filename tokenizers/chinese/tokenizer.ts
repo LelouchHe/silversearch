@@ -17,6 +17,7 @@ interface Cache {
 
 export async function init() {
     if (wasm) {
+        console.log("[Silversearch] Chinese tokenizer already initialized");
         return true;
     }
 
@@ -42,7 +43,7 @@ export async function init() {
         return false;
     }
 
-    return true;
+    return wasm !== null;
 }
 
 export async function reset() {
