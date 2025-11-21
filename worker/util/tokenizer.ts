@@ -6,28 +6,34 @@ import { BRACKETS_AND_SPACE, SPACE_OR_PUNCTUATION } from "./global.ts";
 export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boolean }): string[] {
     try {
         const words = tokenizeWords(text);
+
         let urls: string[] = [];
         if (options.tokenizeUrls) {
             // Would love to use silverbullet here, but we can't introduce async here
             urls = extractMdLinks(text).map(link => link.href);
         }
 
-        let tokens = tokenizeTokens(text, { skipChs: true });
-        tokens = [...tokens.flatMap(token => [
-            token,
-            ...splitHyphens(token),
-            ...splitCamelCase(token),
-        ]), ...words];
+        const tokens = tokenizeTokens(text)
+            .flatMap(token => [
+                token,
+                ...splitHyphens(token),
+                ...splitCamelCase(token),
+            ]);
 
-        // Add urls
-        if (urls.length) {
-            tokens = [...tokens, ...urls];
-        }
+        // Just throw all methods of tokenization at the problem and hope some
+        // stuff sticks. Unsure if this is really the best approach here, but
+        // it's the one omnisearch chooses
+        const all = [
+            ...tokens,
+            ...words,
+            ...urls,
+        ];
 
-        // Remove duplicates
-        tokens = [...new Set(tokens)];
+        // Omnisearch removed this too
+        // My guess would be that keeping doubled tokens improves search results
+        // all = [...new Set(all)];
 
-        return tokens;
+        return all;
     } catch (e) {
         console.error("[Silversearch] Error tokenizing text, skipping document", e);
         return [];
@@ -36,39 +42,33 @@ export function tokenizeForIndexing(text: string, options: { tokenizeUrls: boole
 
 export function tokenizeForSearch(text: string): QueryCombination {
     // Extract urls and remove them from the query
-    // deno-lint-ignore no-explicit-any
-    const urls: string[] = extractMdLinks(text).map((link: any) => link.href);
-    text = urls.reduce((acc, url) => acc.replace(url, ''), text);
+    const urls: string[] = extractMdLinks(text).map(link => link.href);
+    text = urls.reduce((acc, url) => acc.replace(url, ""), text);
 
-    const tokens = [...tokenizeTokens(text), ...urls].filter(Boolean);
+    const tokens = [...tokenizeTokens(text), ...urls];
 
     return {
         combineWith: 'OR',
         queries: [
             { combineWith: 'AND', queries: tokens },
-            {
-                combineWith: 'AND',
-                queries: tokenizeWords(text).filter(Boolean),
-            },
+            { combineWith: 'AND', queries: tokenizeWords(text) },
             { combineWith: 'AND', queries: tokens.flatMap(splitHyphens) },
             { combineWith: 'AND', queries: tokens.flatMap(splitCamelCase) },
         ],
     };
 }
 
-function tokenizeWords(text: string, { skipChs = false } = {}): string[] {
-    const tokens = text.split(BRACKETS_AND_SPACE);
-    if (skipChs) return tokens;
-    return tokenizeChsWord(tokens);
+
+function tokenizeWords(text: string): string[] {
+    const tokens = text.split(BRACKETS_AND_SPACE).filter(Boolean);
+    return tokenizeLanguage(tokens);
 }
 
-function tokenizeTokens(text: string, { skipChs = false } = {}): string[] {
-    const tokens = text.split(SPACE_OR_PUNCTUATION);
-    if (skipChs) return tokens;
-    return tokenizeChsWord(tokens);
+function tokenizeTokens(text: string): string[] {
+    return text.split(SPACE_OR_PUNCTUATION).filter(Boolean);
+    //return tokenizeLanguage(tokens);
 }
 
-function tokenizeChsWord(tokens: string[]): string[] {
-    // TODO: Tokenize Chineese
+function tokenizeLanguage(tokens: string[]): string[] {
     return tokens;
 }
