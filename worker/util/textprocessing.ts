@@ -22,22 +22,16 @@ export function stringsToRegex(strings: string[]): RegExp {
     return new RegExp(`${joined}`, 'gui');
 }
 
-async function processTextForDisplay(text: string): Promise<string> {
-    const settings = await getPlugConfig();
-    
+function processText(text: string, renderLineReturnInExcerpts: boolean): string {
     text = escapeHTML(text);
     
-    if (settings.renderLineReturnInExcerpts) {
+    if (renderLineReturnInExcerpts) {
         text = text.replaceAll('\n', '<br>');
     }
-    
-    return text;
-}
 
-async function normalizeLineBreaks(text: string): Promise<string> {
-    const settings = await getPlugConfig();
-    
-    if (settings.renderLineReturnInExcerpts) {
+    text = text.trim();
+
+    if (renderLineReturnInExcerpts) {
         const lineReturn = new RegExp(/(?:\r\n|\r|\n)/g);
         // Remove multiple line returns
         text = text
@@ -45,7 +39,7 @@ async function normalizeLineBreaks(text: string): Promise<string> {
             .filter(l => l)
             .join('\n');
     }
-    
+
     return text;
 }
 
@@ -80,9 +74,7 @@ export async function getMatches(
 
         if (originalMatch && match.index >= 0) {
             // Process match the same way as excerpt content for consistent highlighting
-            originalMatch = await normalizeLineBreaks(originalMatch);
-            originalMatch = originalMatch.trim();
-            originalMatch = await processTextForDisplay(originalMatch);
+            originalMatch = processText(originalMatch, settings.renderLineReturnInExcerpts);
             matches.push({ match: originalMatch, offset: match.index });
         }
     }
@@ -91,10 +83,7 @@ export async function getMatches(
     if (query && (query.query.text.length > 1 || query.getExactTerms().length > 0)) {
         const best = text.indexOf(query.getBestStringForExcerpt());
         if (best > -1 && matches.find(m => m.offset === best)) {
-            let bestMatch = query.getBestStringForExcerpt();
-            bestMatch = await normalizeLineBreaks(bestMatch);
-            bestMatch = bestMatch.trim();
-            bestMatch = await processTextForDisplay(bestMatch);
+            const bestMatch = processText(query.getBestStringForExcerpt(), settings.renderLineReturnInExcerpts);
             matches.unshift({
                 offset: best,
                 match: bestMatch,
@@ -135,12 +124,7 @@ export async function makeExcerpt(content: string, offset: number): Promise<Resu
         // Trim after slicing
         content = content.trim();
         content = (from > 0 ? '…' : '') + content + (to < content.length - 1 ? '…' : '');
-        
-        // Now normalize line breaks (collapse multiple to single)
-        content = await normalizeLineBreaks(content);
-
-        // Final processing for display
-        content = await processTextForDisplay(content);
+        content = processText(content, settings.renderLineReturnInExcerpts);
 
         return { excerpt: content, offset: offset };
     } catch (e) {
