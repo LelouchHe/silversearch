@@ -26,8 +26,8 @@ export class SearchEngine {
     }
 
     public static async create(settings: SilversearchSettings): Promise<SearchEngine> {
-        const tokenizers: Tokenizer[] = (await Promise.all(settings.tokenizers.map(async path => {
-            return await Tokenizer.loadFromPath(path);
+        const tokenizers: Tokenizer[] = (await Promise.all(Object.entries(settings.tokenizers).map(async ([path, config]) => {
+            return await Tokenizer.loadFromPath(path, config);
         }))).filter(t => t !== null);
 
         return new SearchEngine(settings, tokenizers);

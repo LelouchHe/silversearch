@@ -3,9 +3,10 @@ import { QueryCombination } from "minisearch";
 import { extractMdLinks } from "md-link-extractor";
 import { BRACKETS_AND_SPACE, SPACE_OR_PUNCTUATION } from "./global.ts";
 import * as v from "@valibot/valibot"
+import { TokenizerConfig } from "./settings.ts";
 
 type TokenizerImplementation = {
-    init: () => Promise<void>,
+    init: (config: TokenizerConfig) => Promise<void>,
     isTokenizable: (text: string) => boolean,
     tokenize: (text: string) => string[]
 }
@@ -31,7 +32,7 @@ const tokenizerImplementationSchema = v.strictObject({
 export class Tokenizer {
     private constructor(private readonly implementation: TokenizerImplementation) {}
 
-    public static async loadFromPath(path: string): Promise<Tokenizer | null> {
+    public static async loadFromPath(path: string, config: TokenizerConfig): Promise<Tokenizer | null> {
         let module;
         try {
             module = await import(`/.fs/${path}`);
@@ -44,7 +45,7 @@ export class Tokenizer {
 
         if (result.success) {
             const tokenizer = new Tokenizer(result.output satisfies TokenizerImplementation);
-            await tokenizer.implementation.init();
+            await tokenizer.implementation.init(config);
 
             return tokenizer;
         } else {

@@ -5,6 +5,25 @@ import { RecencyCutoff } from "./global.ts";
 let errorWasShown = false;
 let settings: null | SilversearchSettings = null;
 
+export type TokenizerConfig =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: TokenizerConfig }
+  | TokenizerConfig[];
+
+const tokenizerConfigSchema: v.GenericSchema<TokenizerConfig> = v.lazy(() =>
+  v.union([
+    v.string(),
+    v.number(),
+    v.boolean(),
+    v.null(),
+    v.record(v.string(), tokenizerConfigSchema),
+    v.array(tokenizerConfigSchema),
+  ])
+);
+
 const weightSchema = v.strictObject({
     content: v.optional(v.number(), 1),
     basename: v.optional(v.number(), 10),
@@ -25,7 +44,7 @@ const settingsSchema = v.strictObject({
     splitCamelCase: v.optional(v.boolean(), true),
     fuzziness: v.optional(v.picklist(["0", "1", "2"]), "1"),
     renderLineReturnInExcerpts: v.optional(v.boolean(), true),
-    tokenizers: v.optional(v.array(v.pipe(v.string(), v.nonEmpty())), [])
+    tokenizers: v.optional(v.record(v.pipe(v.string(), v.nonEmpty()), v.record(v.string(), tokenizerConfigSchema)), {})
 });
 
 export type SilversearchSettings = v.InferOutput<typeof settingsSchema>
