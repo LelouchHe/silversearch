@@ -3,7 +3,7 @@ import { QueryCombination } from "minisearch";
 import { extractMdLinks } from "md-link-extractor";
 import { BRACKETS_AND_SPACE, SPACE_OR_PUNCTUATION } from "./global.ts";
 import * as v from "@valibot/valibot"
-import { TokenizerConfig } from "./settings.ts";
+import { TokenizerConfig, tokenizerConfigSchema } from "./settings.ts";
 
 type TokenizerImplementation = {
     init: (config: TokenizerConfig) => Promise<void>,
@@ -14,7 +14,7 @@ type TokenizerImplementation = {
 const tokenizerImplementationSchema = v.strictObject({
     init: v.pipe(
         v.function(),
-        v.args(v.tuple([])),
+        v.args(v.tuple([tokenizerConfigSchema])),
         v.returnsAsync(v.void())
     ),
     isTokenizable: v.pipe(

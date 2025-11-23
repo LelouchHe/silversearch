@@ -13,7 +13,7 @@ export type TokenizerConfig =
   | { [key: string]: TokenizerConfig }
   | TokenizerConfig[];
 
-const tokenizerConfigSchema: v.GenericSchema<TokenizerConfig> = v.lazy(() =>
+export const tokenizerConfigSchema: v.GenericSchema<TokenizerConfig> = v.lazy(() =>
   v.union([
     v.string(),
     v.number(),
