@@ -1,5 +1,13 @@
 # Note from LelouchHe
 
+## Updates
+
+The edge version of [Silversearch](https://github.com/MrMugame/silversearch) has supported tokenizer plugs. Please refer to [Silversearch Chinese Tokenizer](https://github.com/LelouchHe/silversearch-chinese-tokenizer).
+
+The current `multilingual-support` is working, but will not receive any more updates.
+
+## Forked Silversearch with Chinese support
+
 This is a forked version of [Silversearch](https://github.com/MrMugame/silversearch). The `main` branch keeps in sync with upstream, while the [`multilingual-support`](https://github.com/LelouchHe/silversearch/tree/multilingual-support) branch includes support for multilingual tokenizers:
 
 | Language | Dependency | Setting |
